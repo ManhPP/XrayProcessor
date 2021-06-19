@@ -1,15 +1,9 @@
-import os
-
 import imageio
 
-from unsharping_mask import UM
-from clahe import CLAHE
-from hef import HEF
-
+from xray_processor import XRayProcessor
 
 if __name__ == '__main__':
     img = "img.jpg"
-    alg = HEF(img)
-    processed_image = alg.run()
+    processed_image = XRayProcessor.clahe(img)
     filename = "result.jpg"
     imageio.imwrite(filename, processed_image)

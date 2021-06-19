@@ -1,18 +1,17 @@
-import numpy as np
+from collections import OrderedDict
 
-from collections import OrderedDict, defaultdict
+import numpy as np
 
 
 def normalize(min_old, max_old, min_new, max_new, val):
-    '''Normalizes values to the interval [min_new, max_new]
-
-	Parameters:
-		min_old: min value from old base.
-		max_old: max value from old base.
-		min_new: min value from new base.
-		max_new: max value from new base.
-		val: float or array-like value to be normalized.
-	'''
+    """
+    Normalizes values to the interval [min_new, max_new]
+	:param	min_old: min value from old base.
+	:param	max_old: max value from old base.
+	:param	min_new: min value from new base.
+	:param	max_new: max value from new base.
+	:param	val: float or array-like value to be normalized.
+	"""
 
     ratio = (val - min_old) / (max_old - min_old)
     normalized = (max_new - min_new) * ratio + min_new
@@ -20,14 +19,11 @@ def normalize(min_old, max_old, min_new, max_new, val):
 
 
 def histogram(data):
-    '''Generates the histogram for the given data.
-
-	Parameters:
-		data: data to make the histogram.
-
-	Returns: histogram, bins.
-	'''
-
+    """
+    Generates the histogram for the given data.
+	:param	data: data to make the histogram.
+	:return: histogram, bins
+    """
     pixels, count = np.unique(data, return_counts=True)
     hist = OrderedDict()
 
@@ -46,59 +42,34 @@ def to_grayscale(image):
     return image.astype(np.uint8)
 
 
-def clip_histogram(hist, bins, clip_limit):
-    '''Clips the given histogram.
-
-	Parameters:
-		hist: frequencies of each pixel.
-		bins: pixels.
-		clip_limit: limit to pixel frequencies.
-
-	Returns the clipped hist.
-	'''
-
-    n_bins = len(bins)
-
-    # Removing values above clip_limit
-    excess = 0
-    for i in range(n_bins):
-        if hist[i] > clip_limit:
-            excess += hist[i] - clip_limit
-            hist[i] = clip_limit
-
-    ## Redistributing exceding values ##
-    # Calculating the values to be put on all bins
-    for_each_bin = excess // n_bins
-    # Calculating the values left
-    leftover = excess % n_bins
-
-    hist += for_each_bin
-    for i in range(leftover):
-        hist[i] += 1
-
-    return hist
+def sub_hist(image_pdf, minimum, maximum, normalize):
+    """
+    Compute the subhistogram between [minimum, maximum] of a given histogram image_pdf
+    :param image_pdf: numpy.array
+    :param minimum: int
+    :param maximum: int
+    :param normalize: boolean
+    :return: numpy.array
+    """
+    hi = np.zeros(shape=image_pdf.shape)
+    total = 0
+    for idx in range(minimum, maximum + 1):
+        total += image_pdf[idx]
+        hi[idx] = image_pdf[idx]
+    if normalize:
+        for idx in range(minimum, maximum + 1):
+            hi[idx] /= total
+    return hi
 
 
-def calculate_cdf(hist, bins):
-    '''Calculates the normalized CDF (Cumulative Distribution Function)
-	for the histogram.
-
-	Parameters:
-		hist: frequencies of each pixel.
-		bins: pixels.
-
-	Returns the CDF in a dictionary.
-	'''
-
-    # Calculating probability for each pixel
-    pixel_probability = hist / hist.sum()
-    # Calculating the CDF (Cumulative Distribution Function)
-    cdf = np.cumsum(pixel_probability)
-
-    cdf_normalized = cdf * 255
-
-    hist_eq = {}
-    for i in range(len(cdf)):
-        hist_eq[bins[i]] = int(cdf_normalized[i])
-
-    return hist_eq
+def CDF(hist):
+    """
+    Compute the CDF of the input histogram
+    :param hist: numpy.array()
+    :return: numpy.array()
+    """
+    cdf = np.zeros(shape=hist.shape)
+    cdf[0] = hist[0]
+    for idx in range(1, len(hist)):
+        cdf[idx] = cdf[idx - 1] + hist[idx]
+    return cdf
