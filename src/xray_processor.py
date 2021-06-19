@@ -120,7 +120,7 @@ class XRayProcessor:
         return image.astype(np.uint8)
 
     @staticmethod
-    def run(filename, filter_type="gauss", radius=5, amount=2):
+    def unsharp_masking(filename, filter_type="gauss", radius=5, amount=2):
         image = imageio.imread(filename)
         image = img_as_float(image)
 
