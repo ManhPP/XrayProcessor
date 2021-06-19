@@ -1,0 +1,15 @@
+cycler
+decorator
+imageio
+kiwisolver
+matplotlib
+networkx
+numpy
+Pillow
+pyparsing
+python-dateutil
+PyWavelets
+scikit-image
+scipy
+six
+opencv-python
